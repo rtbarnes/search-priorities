@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, GripVertical } from "lucide-react";
+import { CSS } from "@dnd-kit/utilities";
 
 function Draggable({
   id,
@@ -26,8 +27,13 @@ function Draggable({
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id,
   });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
+
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners}>
+    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
       {children}
     </div>
   );
@@ -83,7 +89,9 @@ const SearchRanker = () => {
     text: "",
     tags: "",
   });
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<
+    Array<(typeof items)[0] & { score: number }>
+  >([]);
 
   // Handle search
   const handleSearch = () => {
@@ -135,7 +143,11 @@ const SearchRanker = () => {
   };
 
   // Handle priority reordering
-  const handleDragEnd = (event) => {
+  const handleDragEnd = (event: {
+    active: { id: string };
+    over: { id: string } | null;
+  }) => {
+    if (!event.over) return;
     const { active, over } = event;
 
     if (active.id !== over.id) {
@@ -226,38 +238,20 @@ const SearchRanker = () => {
             onDragEnd={handleDragEnd}
             modifiers={[restrictToVerticalAxis]}
           >
-            <Droppable droppableId="priorities">
-              {(provided) => (
-                <div
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                  className="space-y-2"
-                >
-                  {priorities.map((priority, index) => (
-                    <Draggable
-                      key={priority.id}
-                      draggableId={priority.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
-                        >
-                          <GripVertical className="text-gray-400" size={20} />
-                          <span className="flex-1">{priority.label}</span>
-                          <Badge variant="secondary">
-                            Weight: {(1 - index * 0.2).toFixed(1)}
-                          </Badge>
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
+            <Droppable id="priorities">
+              <div className="space-y-2">
+                {priorities.map((priority, index) => (
+                  <Draggable key={priority.id} id={priority.id}>
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                      <GripVertical className="text-gray-400" size={20} />
+                      <span className="flex-1">{priority.label}</span>
+                      <Badge variant="secondary">
+                        Weight: {(1 - index * 0.2).toFixed(1)}
+                      </Badge>
+                    </div>
+                  </Draggable>
+                ))}
+              </div>
             </Droppable>
           </DndContext>
         </CardContent>
