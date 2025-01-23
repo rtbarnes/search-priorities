@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -93,8 +93,9 @@ const SearchRanker = () => {
     Array<(typeof items)[0] & { score: number }>
   >([]);
 
-  // Handle search
-  const handleSearch = () => {
+  // Add useEffect import at the top if not already present
+  useEffect(() => {
+    // Move search logic here
     if (!searchQuery.trim()) {
       setResults([]);
       return;
@@ -140,7 +141,7 @@ const SearchRanker = () => {
       .sort((a, b) => b.score - a.score);
 
     setResults(filteredResults);
-  };
+  }, [searchQuery, items, priorities]); // Dependencies for the effect
 
   // Handle priority reordering
   const handleDragEnd = (event: {
@@ -181,161 +182,162 @@ const SearchRanker = () => {
   };
 
   return (
-    <div className="p-4 max-w-6xl mx-auto space-y-6">
-      {/* Search Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Search</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
+    <div className="w-full flex gap-4 p-4">
+      <div className="flex-1 flex flex-col gap-4">
+        {/* Search Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Search</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <Input
               placeholder="Enter search query..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={handleSearch}>Search</Button>
-          </div>
 
-          {results.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold mb-2">Results</h3>
-              <div className="space-y-2">
-                {results.map((item) => (
-                  <Card key={item.id} className="p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{item.name}</h4>
-                        <p className="text-sm text-gray-600">{item.text}</p>
-                        <div className="flex gap-1 mt-2">
+            {results.length > 0 && (
+              <div className="mt-4">
+                <h3 className="text-lg font-semibold mb-2">Results</h3>
+                <div className="space-y-2">
+                  {results.map((item) => (
+                    <Card key={item.id} className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium">{item.name}</h4>
+                          <p className="text-sm text-gray-600">{item.text}</p>
+                          <div className="flex gap-1 mt-2">
+                            {item.tags.map((tag, index) => (
+                              <Badge key={index} variant="secondary">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <Badge variant="outline">
+                          Score: {item.score.toFixed(2)}
+                        </Badge>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex-1 flex flex-col gap-4">
+        {/* Priorities Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Search Priorities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DndContext
+              onDragEnd={handleDragEnd}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <Droppable id="priorities">
+                <div className="space-y-2">
+                  {priorities.map((priority, index) => (
+                    <Draggable key={priority.id} id={priority.id}>
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                        <GripVertical className="text-gray-400" size={20} />
+                        <span className="flex-1">{priority.label}</span>
+                        <Badge variant="secondary">
+                          Weight: {(1 - index * 0.2).toFixed(1)}
+                        </Badge>
+                      </div>
+                    </Draggable>
+                  ))}
+                </div>
+              </Droppable>
+            </DndContext>
+          </CardContent>
+        </Card>
+
+        {/* Database Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Item Database</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Add new item form */}
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Name"
+                  value={newItem.name}
+                  onChange={(e) =>
+                    setNewItem({ ...newItem, name: e.target.value })
+                  }
+                />
+                <Input
+                  placeholder="Text description"
+                  value={newItem.text}
+                  onChange={(e) =>
+                    setNewItem({ ...newItem, text: e.target.value })
+                  }
+                />
+                <Input
+                  placeholder="Tags (comma-separated)"
+                  value={newItem.tags}
+                  onChange={(e) =>
+                    setNewItem({ ...newItem, tags: e.target.value })
+                  }
+                />
+                <Button onClick={handleAddItem}>
+                  <Plus size={20} />
+                </Button>
+              </div>
+
+              {/* Items table */}
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Text</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.id}</TableCell>
+                      <TableCell>{item.name}</TableCell>
+                      <TableCell>{item.text}</TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
                           {item.tags.map((tag, index) => (
                             <Badge key={index} variant="secondary">
                               {tag}
                             </Badge>
                           ))}
                         </div>
-                      </div>
-                      <Badge variant="outline">
-                        Score: {item.score.toFixed(2)}
-                      </Badge>
-                    </div>
-                  </Card>
-                ))}
-              </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setItems(items.filter((i) => i.id !== item.id))
+                          }
+                        >
+                          <X size={16} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Priorities Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Search Priorities</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <DndContext
-            onDragEnd={handleDragEnd}
-            modifiers={[restrictToVerticalAxis]}
-          >
-            <Droppable id="priorities">
-              <div className="space-y-2">
-                {priorities.map((priority, index) => (
-                  <Draggable key={priority.id} id={priority.id}>
-                    <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                      <GripVertical className="text-gray-400" size={20} />
-                      <span className="flex-1">{priority.label}</span>
-                      <Badge variant="secondary">
-                        Weight: {(1 - index * 0.2).toFixed(1)}
-                      </Badge>
-                    </div>
-                  </Draggable>
-                ))}
-              </div>
-            </Droppable>
-          </DndContext>
-        </CardContent>
-      </Card>
-
-      {/* Database Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Item Database</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Add new item form */}
-            <div className="flex gap-2">
-              <Input
-                placeholder="Name"
-                value={newItem.name}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, name: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Text description"
-                value={newItem.text}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, text: e.target.value })
-                }
-              />
-              <Input
-                placeholder="Tags (comma-separated)"
-                value={newItem.tags}
-                onChange={(e) =>
-                  setNewItem({ ...newItem, tags: e.target.value })
-                }
-              />
-              <Button onClick={handleAddItem}>
-                <Plus size={20} />
-              </Button>
-            </div>
-
-            {/* Items table */}
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Text</TableHead>
-                  <TableHead>Tags</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.id}</TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.text}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        {item.tags.map((tag, index) => (
-                          <Badge key={index} variant="secondary">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setItems(items.filter((i) => i.id !== item.id))
-                        }
-                      >
-                        <X size={16} />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
