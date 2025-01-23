@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { DndContext, useDroppable, useDraggable } from "@dnd-kit/core";
+import {
+  DndContext,
+  useDroppable,
+  useDraggable,
+  DragEndEvent,
+  DragOverEvent,
+} from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,24 +22,36 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, GripVertical } from "lucide-react";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
 
-function Draggable({
+function SortableItem({
   id,
   children,
 }: {
   id: string;
   children: React.ReactNode;
 }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id,
-  });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
 
   const style = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
-    <div ref={setNodeRef} {...attributes} {...listeners} style={style}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       {children}
     </div>
   );
@@ -93,6 +111,8 @@ const SearchRanker = () => {
     Array<(typeof items)[0] & { score: number }>
   >([]);
 
+  // Add new state for tracking drop target
+
   // Add useEffect import at the top if not already present
   useEffect(() => {
     // Move search logic here
@@ -143,11 +163,8 @@ const SearchRanker = () => {
     setResults(filteredResults);
   }, [searchQuery, items, priorities]); // Dependencies for the effect
 
-  // Handle priority reordering
-  const handleDragEnd = (event: {
-    active: { id: string };
-    over: { id: string } | null;
-  }) => {
+  // Update DndContext to include onDragOver and reset activeDropId when drag ends
+  const handleDragEnd = (event: DragEndEvent) => {
     if (!event.over) return;
     const { active, over } = event;
 
@@ -239,21 +256,28 @@ const SearchRanker = () => {
               onDragEnd={handleDragEnd}
               modifiers={[restrictToVerticalAxis]}
             >
-              <Droppable id="priorities">
+              <SortableContext
+                items={priorities.map((p) => p.id)}
+                strategy={verticalListSortingStrategy}
+              >
                 <div className="space-y-2">
-                  {priorities.map((priority, index) => (
-                    <Draggable key={priority.id} id={priority.id}>
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                        <GripVertical className="text-gray-400" size={20} />
-                        <span className="flex-1">{priority.label}</span>
-                        <Badge variant="secondary">
-                          Weight: {(1 - index * 0.2).toFixed(1)}
-                        </Badge>
-                      </div>
-                    </Draggable>
+                  {priorities.map((priority) => (
+                    <React.Fragment key={priority.id}>
+                      <SortableItem id={priority.id}>
+                        <div className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                          <GripVertical className="text-gray-400" size={20} />
+                          <span className="flex-1">{priority.label}</span>
+                          <Badge variant="secondary">
+                            Weight:{" "}
+                            {priorities.findIndex((p) => p.id === priority.id) *
+                              0.2}
+                          </Badge>
+                        </div>
+                      </SortableItem>
+                    </React.Fragment>
                   ))}
                 </div>
-              </Droppable>
+              </SortableContext>
             </DndContext>
           </CardContent>
         </Card>
