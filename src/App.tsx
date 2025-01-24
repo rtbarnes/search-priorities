@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  DndContext,
-  useDroppable,
-  useDraggable,
-  DragEndEvent,
-  DragOverEvent,
-} from "@dnd-kit/core";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { arrayMove } from "@dnd-kit/sortable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +21,11 @@ import {
   verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
+import {
+  performSearch,
+  type SearchableItem,
+  type SearchPriority,
+} from "./utils/search";
 
 function SortableItem({
   id,
@@ -57,20 +56,9 @@ function SortableItem({
   );
 }
 
-function Droppable({
-  id,
-  children,
-}: {
-  id: string;
-  children: React.ReactNode;
-}) {
-  const { setNodeRef } = useDroppable({ id });
-  return <div ref={setNodeRef}>{children}</div>;
-}
-
 const SearchRanker = () => {
-  // Sample initial data
-  const [items, setItems] = useState([
+  // Update items state type
+  const [items, setItems] = useState<SearchableItem[]>([
     {
       id: 1,
       name: "React Hooks",
@@ -91,8 +79,8 @@ const SearchRanker = () => {
     },
   ]);
 
-  // Search priorities
-  const [priorities, setPriorities] = useState([
+  // Update priorities state type
+  const [priorities, setPriorities] = useState<SearchPriority[]>([
     { id: "exact-name", label: "Exact name match", weight: 1.0 },
     { id: "partial-name", label: "Partial name match", weight: 0.7 },
     { id: "tag-match", label: "Tag match", weight: 0.5 },
@@ -111,57 +99,10 @@ const SearchRanker = () => {
     Array<(typeof items)[0] & { score: number }>
   >([]);
 
-  // Add new state for tracking drop target
-
-  // Add useEffect import at the top if not already present
+  // Simplified useEffect using the imported search function
   useEffect(() => {
-    // Move search logic here
-    if (!searchQuery.trim()) {
-      setResults([]);
-      return;
-    }
-
-    const scoredResults = items.map((item) => {
-      let score = 0;
-      const query = searchQuery.toLowerCase();
-
-      // Apply each priority with its weight
-      priorities.forEach((priority, index) => {
-        const weight = 1 - index * 0.2; // Decreasing weight based on priority order
-
-        switch (priority.id) {
-          case "exact-name":
-            if (item.name.toLowerCase() === query) {
-              score += weight * 10;
-            }
-            break;
-          case "partial-name":
-            if (item.name.toLowerCase().includes(query)) {
-              score += weight * 5;
-            }
-            break;
-          case "tag-match":
-            if (item.tags.some((tag) => tag.toLowerCase().includes(query))) {
-              score += weight * 3;
-            }
-            break;
-          case "text-match":
-            if (item.text.toLowerCase().includes(query)) {
-              score += weight * 2;
-            }
-            break;
-        }
-      });
-
-      return { ...item, score };
-    });
-
-    const filteredResults = scoredResults
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score);
-
-    setResults(filteredResults);
-  }, [searchQuery, items, priorities]); // Dependencies for the effect
+    setResults(performSearch(searchQuery, items, priorities));
+  }, [searchQuery, items, priorities]);
 
   // Update DndContext to include onDragOver and reset activeDropId when drag ends
   const handleDragEnd = (event: DragEndEvent) => {
