@@ -47,6 +47,7 @@ export const sampleItems: SearchableItem[] = [
 
 export const defaultPriorities: SearchPriority[] = [
   { id: "exact-name", label: "Exact name match" },
+  { id: "exact-text", label: "Exact text match" },
   { id: "partial-name", label: "Partial name match" },
   { id: "tag-match", label: "Tag match" },
   { id: "text-match", label: "Text content match" },

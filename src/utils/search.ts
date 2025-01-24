@@ -10,6 +10,13 @@ export type SearchPriority = {
   label: string;
 };
 
+export type PriorityId =
+  | "exact-name"
+  | "exact-text"
+  | "partial-name"
+  | "tag-match"
+  | "text-match";
+
 export type ScoredItem<T extends SearchableItem> = T & {
   score: number;
 };
@@ -34,6 +41,11 @@ export function performSearch<T extends SearchableItem>(
       switch (priority.id) {
         case "exact-name":
           if (item.name.toLowerCase() === searchQuery) {
+            score += priorityScore;
+          }
+          break;
+        case "exact-text":
+          if (item.text.toLowerCase() === searchQuery) {
             score += priorityScore;
           }
           break;
