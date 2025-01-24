@@ -26,6 +26,7 @@ import {
   type SearchableItem,
   type SearchPriority,
 } from "./utils/search";
+import { sampleItems, defaultPriorities } from "./data/sampleItems";
 
 function SortableItem({
   id,
@@ -58,34 +59,11 @@ function SortableItem({
 
 const SearchRanker = () => {
   // Update items state type
-  const [items, setItems] = useState<SearchableItem[]>([
-    {
-      id: 1,
-      name: "React Hooks",
-      text: "Understanding React Hooks and their usage",
-      tags: ["react", "javascript", "frontend"],
-    },
-    {
-      id: 2,
-      name: "TypeScript Basics",
-      text: "Introduction to TypeScript fundamentals",
-      tags: ["typescript", "javascript"],
-    },
-    {
-      id: 3,
-      name: "CSS Grid",
-      text: "Modern layout with CSS Grid",
-      tags: ["css", "frontend"],
-    },
-  ]);
+  const [items, setItems] = useState<SearchableItem[]>(sampleItems);
 
   // Update priorities state type
-  const [priorities, setPriorities] = useState<SearchPriority[]>([
-    { id: "exact-name", label: "Exact name match" },
-    { id: "partial-name", label: "Partial name match" },
-    { id: "tag-match", label: "Tag match" },
-    { id: "text-match", label: "Text content match" },
-  ]);
+  const [priorities, setPriorities] =
+    useState<SearchPriority[]>(defaultPriorities);
 
   // States
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,33 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { performSearch, SearchableItem, SearchPriority } from "./search";
-
-const sampleItems: SearchableItem[] = [
-  {
-    id: 1,
-    name: "React Hooks",
-    text: "Understanding React Hooks and their usage",
-    tags: ["react", "javascript", "frontend"],
-  },
-  {
-    id: 2,
-    name: "TypeScript Basics",
-    text: "Introduction to TypeScript fundamentals",
-    tags: ["typescript", "javascript"],
-  },
-  {
-    id: 3,
-    name: "CSS Grid",
-    text: "Modern layout with CSS Grid",
-    tags: ["css", "frontend"],
-  },
-];
-
-const defaultPriorities: SearchPriority[] = [
-  { id: "exact-name", label: "Exact name match" },
-  { id: "partial-name", label: "Partial name match" },
-  { id: "tag-match", label: "Tag match" },
-  { id: "text-match", label: "Text content match" },
-];
+import { performSearch } from "./search";
+import { sampleItems, defaultPriorities } from "../data/sampleItems";
 
 describe("performSearch", () => {
   it("returns empty array for empty query", () => {
@@ -87,7 +60,6 @@ describe("performSearch", () => {
       reorderedPriorities
     );
 
-    // Scores should be different when priorities are reordered
     expect(defaultResult[0].score).not.toBe(reorderedResult[0].score);
   });
 });
