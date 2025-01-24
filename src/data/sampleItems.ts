@@ -3,21 +3,45 @@ import { SearchableItem, SearchPriority } from "../utils/search";
 export const sampleItems: SearchableItem[] = [
   {
     id: 1,
-    name: "React Hooks",
-    text: "Understanding React Hooks and their usage",
-    tags: ["react", "javascript", "frontend"],
+    name: "Save Changes CTA",
+    text: "Save Changes",
+    tags: ["CTA"],
   },
   {
     id: 2,
-    name: "TypeScript Basics",
-    text: "Introduction to TypeScript fundamentals",
-    tags: ["typescript", "javascript"],
+    name: "Cancel CTA",
+    text: "Cancel",
+    tags: ["CTA"],
   },
   {
     id: 3,
-    name: "CSS Grid",
-    text: "Modern layout with CSS Grid",
-    tags: ["css", "frontend"],
+    name: "Cancel Subscription",
+    text: "Are you sure you want to cancel your subscription?",
+    tags: ["Form"],
+  },
+  {
+    id: 4,
+    name: "Acronym",
+    text: "CTA",
+    tags: [],
+  },
+  {
+    id: 5,
+    name: "Motto",
+    text: "Always be saving!",
+    tags: [],
+  },
+  {
+    id: 6,
+    name: "Header 1",
+    text: "User Preferences",
+    tags: ["Form"],
+  },
+  {
+    id: 7,
+    name: "Changes",
+    text: "Expect changes in your future!",
+    tags: [],
   },
 ];
 

@@ -29,29 +29,29 @@ export function performSearch<T extends SearchableItem>(
 
     // Apply each priority with decreasing score based on order
     priorities.forEach((priority, index) => {
-      const priorityScore = priorities.length - index; // Higher score for earlier priorities
+      const priorityScore = Math.pow(0.8, index);
 
       switch (priority.id) {
         case "exact-name":
           if (item.name.toLowerCase() === searchQuery) {
-            score += priorityScore * 10;
+            score += priorityScore;
           }
           break;
         case "partial-name":
           if (item.name.toLowerCase().includes(searchQuery)) {
-            score += priorityScore * 5;
+            score += priorityScore;
           }
           break;
         case "tag-match":
           if (
             item.tags.some((tag) => tag.toLowerCase().includes(searchQuery))
           ) {
-            score += priorityScore * 3;
+            score += priorityScore;
           }
           break;
         case "text-match":
           if (item.text.toLowerCase().includes(searchQuery)) {
-            score += priorityScore * 2;
+            score += priorityScore;
           }
           break;
       }
