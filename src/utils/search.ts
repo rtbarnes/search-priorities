@@ -8,7 +8,6 @@ export type SearchableItem = {
 export type SearchPriority = {
   id: string;
   label: string;
-  weight: number;
 };
 
 export type ScoredItem<T extends SearchableItem> = T & {
@@ -28,31 +27,31 @@ export function performSearch<T extends SearchableItem>(
     let score = 0;
     const searchQuery = query.toLowerCase();
 
-    // Apply each priority with its weight
+    // Apply each priority with decreasing score based on order
     priorities.forEach((priority, index) => {
-      const weight = 1 - index * 0.2; // Decreasing weight based on priority order
+      const priorityScore = priorities.length - index; // Higher score for earlier priorities
 
       switch (priority.id) {
         case "exact-name":
           if (item.name.toLowerCase() === searchQuery) {
-            score += weight * 10;
+            score += priorityScore * 10;
           }
           break;
         case "partial-name":
           if (item.name.toLowerCase().includes(searchQuery)) {
-            score += weight * 5;
+            score += priorityScore * 5;
           }
           break;
         case "tag-match":
           if (
             item.tags.some((tag) => tag.toLowerCase().includes(searchQuery))
           ) {
-            score += weight * 3;
+            score += priorityScore * 3;
           }
           break;
         case "text-match":
           if (item.text.toLowerCase().includes(searchQuery)) {
-            score += weight * 2;
+            score += priorityScore * 2;
           }
           break;
       }

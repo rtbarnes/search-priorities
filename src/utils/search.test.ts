@@ -23,10 +23,10 @@ const sampleItems: SearchableItem[] = [
 ];
 
 const defaultPriorities: SearchPriority[] = [
-  { id: "exact-name", label: "Exact name match", weight: 1.0 },
-  { id: "partial-name", label: "Partial name match", weight: 0.7 },
-  { id: "tag-match", label: "Tag match", weight: 0.5 },
-  { id: "text-match", label: "Text content match", weight: 0.3 },
+  { id: "exact-name", label: "Exact name match" },
+  { id: "partial-name", label: "Partial name match" },
+  { id: "tag-match", label: "Tag match" },
+  { id: "text-match", label: "Text content match" },
 ];
 
 describe("performSearch", () => {
@@ -70,10 +70,10 @@ describe("performSearch", () => {
 
   it("respects priority order changes", () => {
     const reorderedPriorities = [
-      { id: "tag-match", label: "Tag match", weight: 1.0 },
-      { id: "exact-name", label: "Exact name match", weight: 0.7 },
-      { id: "partial-name", label: "Partial name match", weight: 0.5 },
-      { id: "text-match", label: "Text content match", weight: 0.3 },
+      { id: "tag-match", label: "Tag match" },
+      { id: "exact-name", label: "Exact name match" },
+      { id: "partial-name", label: "Partial name match" },
+      { id: "text-match", label: "Text content match" },
     ];
 
     const defaultResult = performSearch(
